@@ -1,7 +1,8 @@
 # Databricks notebook source
 # DBTITLE 1,Make a cloud directory for the Hadoop Data
-# MAGIC %fs
-# MAGIC mkdirs /data_from_hadoop
+# MAGIC %sh
+# MAGIC rm -rf /dbfs/data_from_hadoop;
+# MAGIC mkdir /dbfs/data_from_hadoop
 
 # COMMAND ----------
 
@@ -48,8 +49,47 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
+# DBTITLE 1,Check the row count 
+# MAGIC %sql
+# MAGIC select count(*) from bronze_transactions;
+
+# COMMAND ----------
+
+# DBTITLE 1,Check the row count 
 # MAGIC %sql
 # MAGIC select * from bronze_transactions limit 10;
+
+# COMMAND ----------
+
+# DBTITLE 1,Copy incremental data from HDFS to cloud storage
+# MAGIC %sh
+# MAGIC export HADOOP_HOME=/usr/local/hadoop/
+# MAGIC export HIVE_HOME=/usr/local/hive/
+# MAGIC export PATH=$HADOOP_HOME/bin:$HIVE_HOME/bin:$PATH
+# MAGIC 
+# MAGIC # NOTE we are copying data to the same location as before!
+# MAGIC hadoop distcp /tmp/raw_transactions2 file:/dbfs/data_from_hadoop
+
+# COMMAND ----------
+
+# DBTITLE 1,Incrementally load data into the bronze table
+# load the incremental data
+(spark.readStream
+  .format("cloudFiles")
+  .option("cloudFiles.format", "json")
+  .option("cloudFiles.schemaLocation", checkpoint_path)
+  .load(file_path)
+  .select("*", input_file_name().alias("source_file"), current_timestamp().alias("processing_time"))
+  .writeStream
+  .option("checkpointLocation", checkpoint_path)
+  .trigger(availableNow=True)
+  .toTable(table_name))
+
+# COMMAND ----------
+
+# DBTITLE 1,Check row count - should see a minor increase in row count
+# MAGIC %sql
+# MAGIC select count(*) from bronze_transactions;
 
 # COMMAND ----------
 
@@ -58,24 +98,36 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC Handling Small files
+
+# COMMAND ----------
+
+# DBTITLE 1,List current files for BRONZE_TRANSACTION table
 # MAGIC %fs
 # MAGIC ls /user/hive/warehouse/bronze_transactions
 
 # COMMAND ----------
 
+# DBTITLE 1,Run the OPTIMIZE command to compact files
 # MAGIC %sql
 # MAGIC OPTIMIZE bronze_transactions
 
 # COMMAND ----------
 
-
+# DBTITLE 1,File listing after OPTIMZE
+# MAGIC %fs
+# MAGIC ls /user/hive/warehouse/bronze_transactions
 
 # COMMAND ----------
 
+# DBTITLE 1,VACUUM to remove older data files
 # MAGIC %sql
 # MAGIC set spark.databricks.delta.retentionDurationCheck.enabled = false;
 # MAGIC vacuum bronze_transactions retain 0 hours
 
 # COMMAND ----------
 
-
+# DBTITLE 1,File listing after VACUUM
+# MAGIC %fs
+# MAGIC ls /user/hive/warehouse/bronze_transactions

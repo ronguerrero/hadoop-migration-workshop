@@ -97,12 +97,15 @@
 # MAGIC tar zxvf raw_transactions.tgz
 # MAGIC 
 # MAGIC # download the second set of transaction data
-# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/raw_transactions.tgz
+# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/raw_transactions2.tgz
+# MAGIC tar zxvf raw_transactions2.tgz
 # MAGIC 
 # MAGIC 
 # MAGIC #upload to hdfs
 # MAGIC hadoop fs -mkdir /tmp
 # MAGIC hadoop fs -copyFromLocal raw_transactions hdfs:/tmp/
+# MAGIC hadoop fs -copyFromLocal raw_transactions2 hdfs:/tmp/
+# MAGIC 
 # MAGIC 
 # MAGIC # create the raw json table
 # MAGIC hive -e "CREATE EXTERNAL TABLE RAW_TRANSACTIONS (
