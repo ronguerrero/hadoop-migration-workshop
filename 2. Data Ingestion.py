@@ -45,7 +45,7 @@ dbutils.fs.rm(checkpoint_path, True)
   .writeStream
   .option("checkpointLocation", checkpoint_path)
   .trigger(availableNow=True)
-  .toTable(table_name))
+  .toTable(table_name)).awaitTermination()
 
 # COMMAND ----------
 
@@ -55,7 +55,7 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,Check the row count 
+# DBTITLE 1,Spot check the data
 # MAGIC %sql
 # MAGIC select * from bronze_transactions limit 10;
 
@@ -72,7 +72,7 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,Incrementally load data into the bronze table
+# DBTITLE 1,Incrementally load data into the bronze table - assumption is just an append, but we can change this to a merge
 # load the incremental data
 (spark.readStream
   .format("cloudFiles")
@@ -83,7 +83,7 @@ dbutils.fs.rm(checkpoint_path, True)
   .writeStream
   .option("checkpointLocation", checkpoint_path)
   .trigger(availableNow=True)
-  .toTable(table_name))
+  .toTable(table_name)).awaitTermination()
 
 # COMMAND ----------
 
@@ -131,3 +131,7 @@ dbutils.fs.rm(checkpoint_path, True)
 # DBTITLE 1,File listing after VACUUM
 # MAGIC %fs
 # MAGIC ls /user/hive/warehouse/bronze_transactions
+
+# COMMAND ----------
+
+

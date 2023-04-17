@@ -97,7 +97,7 @@
 # MAGIC tar zxvf raw_transactions.tgz
 # MAGIC 
 # MAGIC # download the second set of transaction data
-# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/raw_transactions2.tgz
+# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/raw_transactions2.tgz
 # MAGIC tar zxvf raw_transactions2.tgz
 # MAGIC 
 # MAGIC 
@@ -135,6 +135,34 @@
 # MAGIC ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
 # MAGIC LOCATION '/tmp/raw_transactions'"
 # MAGIC 
+# MAGIC hive -e "CREATE EXTERNAL TABLE RAW_TRANSACTIONS_NEW (
+# MAGIC acc_fv_change_before_taxes float,
+# MAGIC accounting_treatment_id float,
+# MAGIC accrued_interest float,
+# MAGIC arrears_balance float,
+# MAGIC balance float,
+# MAGIC base_rate string,
+# MAGIC behavioral_curve_id float,
+# MAGIC cost_center_code string,
+# MAGIC count float,
+# MAGIC country_code string,
+# MAGIC dte string,
+# MAGIC encumbrance_type string,
+# MAGIC end_date string,
+# MAGIC first_payment_date string,
+# MAGIC guarantee_scheme string,
+# MAGIC id float,
+# MAGIC imit_amount float,
+# MAGIC last_payment_date string,
+# MAGIC minimum_balance_eur float,
+# MAGIC next_payment_date string,
+# MAGIC purpose string,
+# MAGIC status string,
+# MAGIC type string)
+# MAGIC ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+# MAGIC LOCATION '/tmp/raw_transactions2'"
+# MAGIC 
+# MAGIC 
 # MAGIC # create a parquet version of the data
 # MAGIC hive -e "
 # MAGIC create table transactions_parquet like raw_transactions stored as parquet;
@@ -157,6 +185,67 @@
 # MAGIC hive -S -e "
 # MAGIC select * from transactions_parquet limit 1;
 # MAGIC select udftypeof(acc_fv_change_before_taxes) from transactions_parquet limit 1"
+
+# COMMAND ----------
+
+username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+dbfs_raw_path = f"/tmp/{username}/raw_transactions/"
+dbfs_raw_new_path = f"/tmp/{username}/raw_transactions_new/"
+
+dbutils.fs.mkdirs(dbfs_raw_path)
+dbutils.fs.mkdirs(dbfs_raw_new_path)
+
+dbutils.fs.rm(dbfs_raw_path, True)
+dbutils.fs.rm(dbfs_raw_new_path, True)
+
+dbutils.fs.cp("file:/usr/local/hive/raw_transactions/", dbfs_raw_path, True)
+dbutils.fs.cp("file:/usr/local/hive/raw_transactions2/", dbfs_raw_new_path, True)
+
+spark.conf.set("c.dbfs_raw_path", dbfs_raw_path)
+spark.conf.set("c.dbfs_raw_new_path", dbfs_raw_new_path)
+
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DROP TABLE IF EXISTS RAW_TRANSACTIONS;
+# MAGIC CREATE TABLE RAW_TRANSACTIONS (
+# MAGIC acc_fv_change_before_taxes float,
+# MAGIC accounting_treatment_id float,
+# MAGIC accrued_interest float,
+# MAGIC arrears_balance float,
+# MAGIC balance float,
+# MAGIC base_rate string,
+# MAGIC behavioral_curve_id float,
+# MAGIC cost_center_code string,
+# MAGIC count float,
+# MAGIC country_code string,
+# MAGIC dte string,
+# MAGIC encumbrance_type string,
+# MAGIC end_date string,
+# MAGIC first_payment_date string,
+# MAGIC guarantee_scheme string,
+# MAGIC id float,
+# MAGIC imit_amount float,
+# MAGIC last_payment_date string,
+# MAGIC minimum_balance_eur float,
+# MAGIC next_payment_date string,
+# MAGIC purpose string,
+# MAGIC status string,
+# MAGIC type string)
+# MAGIC USING JSON
+# MAGIC LOCATION '${c.dbfs_raw_path}';
+# MAGIC DROP TABLE IF EXISTS RAW_TRANSACTIONS_NEW;
+# MAGIC CREATE TABLE RAW_TRANSACTIONS_NEW LIKE RAW_TRANSACTIONS LOCATION '${c.dbfs_raw_new_path}';
+# MAGIC 
+# MAGIC DROP TABLE IF EXISTS TRANSACTIONS_PARQUET;
+# MAGIC CREATE TABLE TRANSACTIONS_PARQUET LIKE RAW_TRANSACTIONS USING PARQUET;
+# MAGIC INSERT INTO TRANSACTIONS_PARQUET SELECT * FROM RAW_TRANSACTIONS;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select count(*) from RAW_TRANSACTIONS_NEW;
 
 # COMMAND ----------
 
