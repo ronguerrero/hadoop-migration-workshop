@@ -1,0 +1,101 @@
+-- Databricks notebook source
+-- DBTITLE 1,Hive - Table Setup
+-- MAGIC %md
+-- MAGIC insert
+-- MAGIC update
+-- MAGIC delete
+-- MAGIC merge
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Let's look at the original data in Hive
+-- MAGIC %sh
+-- MAGIC export HADOOP_HOME=/usr/local/hadoop/
+-- MAGIC export HIVE_HOME=/usr/local/hive/
+-- MAGIC export PATH=$HADOOP_HOME/bin:$HIVE_HOME/bin:$PATH
+-- MAGIC cd $HIVE_HOME
+-- MAGIC 
+-- MAGIC # We will work with 2 tables:
+-- MAGIC #    a) Original table with existing data - RAW_TRANSACTIONS
+-- MAGIC #    b) Table with new incremental data (updates/insert) - RAW_TRANSACTIONS_NEW
+-- MAGIC 
+-- MAGIC hive -e "
+-- MAGIC SELECT * FROM RAW_TRANSACTIONS limit 3;
+-- MAGIC SELECT * FROM RAW_TRANSACTIONS_NEW limit 3"
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Hive Parquet - Handle Merge of New Data
+-- MAGIC %sh
+-- MAGIC export HADOOP_HOME=/usr/local/hadoop/
+-- MAGIC export HIVE_HOME=/usr/local/hive/
+-- MAGIC export PATH=$HADOOP_HOME/bin:$HIVE_HOME/bin:$PATH
+-- MAGIC cd $HIVE_HOME
+-- MAGIC 
+-- MAGIC hive -e "DROP TABLE IF EXISTS TRANSACTIONS_PARQUET_NEW;
+-- MAGIC          CREATE TABLE TRANSACTIONS_PARQUET_NEW LIKE TRANSACTIONS_PARQUET;
+-- MAGIC          INSERT INTO TRANSACTIONS_PARQUET_NEW (
+-- MAGIC          SELECT * FROM TRANSACTIONS_PARQUET WHERE ID NOT IN (SELECT ID FROM RAW_TRANSACTIONS_NEW)
+-- MAGIC          UNION
+-- MAGIC          SELECT * FROM RAW_TRANSACTIONS_NEW);
+-- MAGIC          ALTER TABLE TRANSACTIONS_PARQUET RENAME TO TRANSACTIONS_PARQUET_OLD;
+-- MAGIC          ALTER TABLE TRANSACTIONS_PARQUET_NEW RENAME TO TRANSACTIONS_PARQUET;"
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Hive - Validate existing data
+-- MAGIC %sh
+-- MAGIC export HADOOP_HOME=/usr/local/hadoop/
+-- MAGIC export HIVE_HOME=/usr/local/hive/
+-- MAGIC export PATH=$HADOOP_HOME/bin:$HIVE_HOME/bin:$PATH
+-- MAGIC cd $HIVE_HOME
+-- MAGIC 
+-- MAGIC hive -e "SELECT * FROM TRANSACTIONS_PARQUET limit 3"
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Databricks - Identical SQL statements as Hive.    Works, but we can do better.
+DROP TABLE IF EXISTS TRANSACTIONS_PARQUET_OLD;
+DROP TABLE IF EXISTS TRANSACTIONS_PARQUET_NEW;
+CREATE TABLE TRANSACTIONS_PARQUET_NEW LIKE TRANSACTIONS_PARQUET;
+INSERT INTO
+  TRANSACTIONS_PARQUET_NEW (
+    SELECT
+      *
+    FROM
+      TRANSACTIONS_PARQUET
+    WHERE
+      ID NOT IN (
+        SELECT
+          ID
+        FROM
+          RAW_TRANSACTIONS_NEW
+      )
+    UNION
+    SELECT
+      *
+    FROM
+      RAW_TRANSACTIONS_NEW
+  );
+ALTER TABLE
+  TRANSACTIONS_PARQUET RENAME TO TRANSACTIONS_PARQUET_OLD;
+ALTER TABLE
+  TRANSACTIONS_PARQUET_NEW RENAME TO TRANSACTIONS_PARQUET;
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Databricks - Use MERGE logic to simplify code
+MERGE INTO 
+   TRANSACTIONS_DELTA 
+USING 
+   RAW_TRANSACTIONS_NEW
+ON 
+   TRANSACTIONS_DELTA.ID = RAW_TRANSACTIONS_NEW.ID
+WHEN MATCHED THEN
+  UPDATE SET *
+WHEN NOT MATCHED THEN
+     INSERT  *
+
+-- COMMAND ----------
+
+

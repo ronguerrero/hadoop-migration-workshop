@@ -249,4 +249,40 @@ spark.conf.set("c.dbfs_raw_new_path", dbfs_raw_new_path)
 
 # COMMAND ----------
 
+dbfs_resources_path = f"/tmp/{username}/resources/"
+dbutils.fs.mkdirs(dbfs_resources_path)
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC cd /tmp
+# MAGIC rm people.*
+# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/people.json 
+# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/people.txt 
+
+# COMMAND ----------
+
+dbutils.fs.cp("file:/tmp/people.json", dbfs_resources_path)
+dbutils.fs.cp("file:/tmp/people.txt", dbfs_resources_path)
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC cd /tmp
+# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/original-spark-examples_2.12-3.3.0.jar
+# MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/modified-spark-examples_2.12-3.3.0.jar
+
+# COMMAND ----------
+
+dbutils.fs.cp("file:/tmp/original-spark-examples_2.12-3.3.0.jar", dbfs_resources_path)
+dbutils.fs.cp("file:/tmp/modified-spark-examples_2.12-3.3.0.jar", dbfs_resources_path)
+
+
+
+# COMMAND ----------
+
+dbutils.fs.ls(dbfs_resources_path)
+
+# COMMAND ----------
+
 
