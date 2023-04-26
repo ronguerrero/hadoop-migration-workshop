@@ -1,4 +1,28 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC ### Ingestion data into the Delta Lakehouse
+# MAGIC 
+# MAGIC #### Technologies Used
+# MAGIC ##### Hadoop
+# MAGIC * DistCP - to copy data from local HDFS to cloud storage
+# MAGIC * Hive - to show content of data in HDFS 
+# MAGIC ##### Databricks
+# MAGIC * Auto Loader - Spark 
+# MAGIC * SQL - Delta
+# MAGIC 
+# MAGIC   
+# MAGIC #### Objectives
+# MAGIC * Migrate data from HDFS to cloud storage
+# MAGIC * Use Auto Loader to load data into the Delta Lake
+# MAGIC * Use Auto Loader to handle incremental loads into the Delta Lake
+# MAGIC * Review how Delta handles small files
+# MAGIC 
+# MAGIC 
+# MAGIC <img src ='https://github.com/ronguerrero/hadoop-migration-workshop/raw/main/resources/Ingestion%20-%20Data%20Flow.png'>
+
+# COMMAND ----------
+
+# DBTITLE 1,Set up environment variables for workshop 
 username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
 dbfs_resources_path = f"/tmp/{username}/resources/"
 os_dbfs_resources_path = f"/dbfs/" + dbfs_resources_path
@@ -9,6 +33,14 @@ import os
 os.environ['DBFS_RESOURCES_PATH'] = os_dbfs_resources_path
 os.environ['DATABASE'] = database
 
+# Import functions
+from pyspark.sql.functions import input_file_name, current_timestamp
+
+# Define variables used in code below
+file_path = dbfs_resources_path + "/data_from_hadoop"
+username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+table_name = f"{database}.bronze_transactions"
+checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # COMMAND ----------
 
@@ -17,6 +49,11 @@ os.environ['DATABASE'] = database
 # MAGIC # just to be sure, remove any existing data
 # MAGIC rm -rf $DBFS_RESOURCES_PATH/data_from_hadoop;
 # MAGIC mkdir $DBFS_RESOURCES_PATH/data_from_hadoop
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC <img src ='https://github.com/ronguerrero/hadoop-migration-workshop/raw/main/resources/Ingestion%20-%20Copy%20to%20Raw.png'>
 
 # COMMAND ----------
 
@@ -35,15 +72,14 @@ os.environ['DATABASE'] = database
 
 # COMMAND ----------
 
-# DBTITLE 1,Let's use autoloader  to load data into Delta
-# Import functions
-from pyspark.sql.functions import input_file_name, current_timestamp
+# MAGIC %md
+# MAGIC <img src ='https://github.com/ronguerrero/hadoop-migration-workshop/raw/main/resources/Ingestion%20-%20AutoLoad%20to%20Delta.png'>
+# MAGIC 
+# MAGIC Auto Loader Documentation - https://docs.databricks.com/ingestion/auto-loader/index.html
 
-# Define variables used in code below
-file_path = dbfs_resources_path + "/data_from_hadoop"
-username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
-table_name = f"{database}.bronze_transactions"
-checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
+# COMMAND ----------
+
+# DBTITLE 1,Let's use autoloader  to load data into Delta
 
 # Clear out data from previous demo execution
 spark.sql(f"DROP TABLE IF EXISTS {table_name}")
@@ -76,6 +112,7 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
+# DBTITLE 1,Review the incremental data from HDFS 
 # MAGIC %sh
 # MAGIC export HADOOP_HOME=/usr/local/hadoop/
 # MAGIC export HIVE_HOME=/usr/local/hive/
@@ -86,6 +123,11 @@ dbutils.fs.rm(checkpoint_path, True)
 # MAGIC echo
 # MAGIC # There are 3 json records we want appended
 # MAGIC hdfs dfs -cat /tmp/raw_transactions2/part-00000-tid-4080381317870435782-30f504d1-326c-4189-8871-aecfe8e7e9e7-2241-1-c000.json
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC <img src ='https://github.com/ronguerrero/hadoop-migration-workshop/raw/main/resources/Incremental%20-%20Copy%20to%20Raw.png'>
 
 # COMMAND ----------
 
@@ -100,7 +142,7 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,Incrementally load data into the bronze table - assumption is just an append, but we can change this to a merge
+# DBTITLE 1,Incrementally load data into the bronze table - assumption is just an append, but this can be changed to a merge
 # load the incremental data
 (spark.readStream
   .format("cloudFiles")
@@ -121,13 +163,14 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
+# DBTITLE 1,Data in Databricks can be access via SQL queries
 # MAGIC %sql
 # MAGIC SELECT sum(balance), country_code FROM bronze_transactions GROUP BY country_code
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Handling Small files
+# MAGIC Databricks Delta handles small files on ingest, and can compact files on demand - https://docs.databricks.com/delta/optimize.html
 
 # COMMAND ----------
 
@@ -146,6 +189,12 @@ dbutils.fs.rm(checkpoint_path, True)
 # DBTITLE 1,File listing after OPTIMZE
 # MAGIC %sh
 # MAGIC ls -l /dbfs/user/hive/warehouse/${DATABASE}.db/bronze_transactions/
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC The Delta VACUUM command removes data files for older revisions beyond a threshold time window.   
+# MAGIC For more information - https://docs.databricks.com/sql/language-manual/delta-vacuum.html
 
 # COMMAND ----------
 

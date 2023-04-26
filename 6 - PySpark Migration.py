@@ -1,5 +1,22 @@
 # Databricks notebook source
 # MAGIC %md
+# MAGIC ### Pyspark
+# MAGIC 
+# MAGIC #### Technologies Used
+# MAGIC ##### Hadoop
+# MAGIC * None - leveraging existing PySpark code which may by a .py file
+# MAGIC ##### Databricks
+# MAGIC * Spark
+# MAGIC 
+# MAGIC   
+# MAGIC #### Steps
+# MAGIC * Review existing PySpark code
+# MAGIC * Identify required modifications
+# MAGIC * Run converted code
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC The next code snippet is purposely meant to fail.
 # MAGIC Key things we need to change are:
 # MAGIC 1) change the HDFS references to a location that exists on the cloud

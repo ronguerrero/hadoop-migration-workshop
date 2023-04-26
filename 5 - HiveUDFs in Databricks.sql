@@ -1,25 +1,40 @@
 -- Databricks notebook source
 -- MAGIC %md
--- MAGIC ####This notebook will demonstrate how to register existing Hive UDFs into Databricks
+-- MAGIC ### Using Hive UDFs in Databricks
+-- MAGIC 
+-- MAGIC #### Technologies Used
+-- MAGIC ##### Hadoop
+-- MAGIC * Hive - to show original execution of UDF 
+-- MAGIC ##### Databricks
+-- MAGIC * SQL
+-- MAGIC   
+-- MAGIC #### Steps
+-- MAGIC * Walkthrough the UDF code to explain what it does
+-- MAGIC * Demonstrate adding the UDF jar file to the cluster
+-- MAGIC * Registering the Hive UDF into Databricks
+-- MAGIC * Executing the Hive UDF with SQL in Databricks
+-- MAGIC 
+-- MAGIC #### Databricks UDF Best Practices
+-- MAGIC 
+-- MAGIC https://docs.databricks.com/udf/index.html#which-udfs-are-most-efficient  
+-- MAGIC Some UDFs are more efficient than others. In terms of performance:
+-- MAGIC 
+-- MAGIC *Built in functions will be fastest because of Databricks optimizers.  
+-- MAGIC *Code that executes in the JVM (Scala, Java, Hive UDFs) will be faster than Python UDFs.  
+-- MAGIC *Pandas UDFs use Arrow to reduce serialization costs associated with Python UDFs.  
+-- MAGIC *Python UDFs should generally be avoided, but Python can be used as glue code without any degradation in performance.  
+-- MAGIC 
+-- MAGIC 
+-- MAGIC #### Setup
 -- MAGIC 
 -- MAGIC The UDF will be using can be found in this git repo: https://github.com/ronguerrero/HiveUDF   
 -- MAGIC It's based on this UDF example from here: https://github.com/ronguerrero/HiveUDF  
 -- MAGIC For the purposes of this demo, we'll use the pre-compliled JAR file: https://github.com/ronguerrero/HiveUDF/blob/main/target/hive-udf-1.0-SNAPSHOT.jar   
 -- MAGIC 
 -- MAGIC 
--- MAGIC Please download hive-udf-1.0-SNAPSHOT.jar to your local computer
-
--- COMMAND ----------
-
--- MAGIC %md
--- MAGIC Attach the downloaded library to your Databricks cluster.
+-- MAGIC Please download hive-udf-1.0-SNAPSHOT.jar to your local computer.  
+-- MAGIC Attach the downloaded library to your Databricks cluster.  
 -- MAGIC Follow along in the demo.  Or refer to the following instructions: https://docs.databricks.com/libraries/cluster-libraries.html#workspace-library
-
--- COMMAND ----------
-
--- MAGIC %python
--- MAGIC username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
--- MAGIC spark.conf.set("c.database", username)
 
 -- COMMAND ----------
 
@@ -102,7 +117,3 @@ SELECT udftypeof(id) FROM raw_transactions limit 1
 
 -- DBTITLE 1,Full transparency - Spark SQL already has this built-in function :)
 SELECT TYPEOF(id) FROM raw_transactions limit 1
-
--- COMMAND ----------
-
-

@@ -1,6 +1,25 @@
 -- Databricks notebook source
 -- MAGIC %md
--- MAGIC #DDL Conversion Considerations
+-- MAGIC 
+-- MAGIC %md
+-- MAGIC ### Convert Hive DDL to Databricks
+-- MAGIC 
+-- MAGIC #### Technologies Used
+-- MAGIC ##### Hadoop
+-- MAGIC * Hive - to show content of data in HDFS 
+-- MAGIC ##### Databricks
+-- MAGIC * SQL
+-- MAGIC 
+-- MAGIC   
+-- MAGIC #### Objectives
+-- MAGIC * Review and existing Hive DDL statement
+-- MAGIC * Demonstrate how existing Hive DDL statements can be run in Databricks
+-- MAGIC * Highlight recommended changes to Hive DDL statements
+-- MAGIC * Options to convert data into Delta Format (beyond Auto Loader)
+-- MAGIC 
+-- MAGIC 
+-- MAGIC 
+-- MAGIC #### DDL Conversion Considerations
 -- MAGIC 
 -- MAGIC Majority of data types align between Hive / Impala and Databricks SQL
 -- MAGIC 
@@ -86,7 +105,7 @@ TBLPROPERTIES (
 -- MAGIC &nbsp;
 -- MAGIC 1) Convert to Spark SQL syntax - USING clause vs STORED AS  
 -- MAGIC 2) Leverage DELTA format  
--- MAGIC 3) Rethink partitioning strategy - https://docs.databricks.com/tables/partitions.html#:~:text=Databricks%20recommends%20all%20partitions%20contain,tables%20with%20many%20smaller%20partitions.
+-- MAGIC 3) Re-review partioning strategy - https://docs.databricks.com/tables/partitions.html#:~:text=Databricks%20recommends%20all%20partitions%20contain,tables%20with%20many%20smaller%20partitions.
 
 -- COMMAND ----------
 
@@ -123,8 +142,10 @@ TBLPROPERTIES (
 -- COMMAND ----------
 
 -- MAGIC %md
--- MAGIC We saw how you an directly ingest data into the Delta Lake using Auto Loader.  
--- MAGIC Databricks can also read data from a Parquet table and write into a Delta version
+-- MAGIC We saw how you can directly ingest data into the Delta Lake using Auto Loader.  
+-- MAGIC Databricks can also read data from a Parquet (or any common data format) table and write into a Delta version.  
+-- MAGIC The ORC format is also supported.     
+-- MAGIC Converting to the Delta format will provide the best performance and ease of data management in the cloud.
 
 -- COMMAND ----------
 
@@ -176,7 +197,3 @@ DESCRIBE EXTENDED TRANSACTIONS_CONVERTED;
 -- DBTITLE 1,Note how there is a delta_log directory within the table data
 -- MAGIC %sh
 -- MAGIC ls /dbfs/user/hive/warehouse/${DATABASE}.db/transactions_converted/
-
--- COMMAND ----------
-
-

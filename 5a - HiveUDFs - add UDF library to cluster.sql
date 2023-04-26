@@ -1,19 +1,6 @@
 -- Databricks notebook source
 -- MAGIC %md
--- MAGIC ####This notebook will demonstrate how to register existing Hive UDFs into Databricks
--- MAGIC 
--- MAGIC The UDF will be using can be found in this git repo: https://github.com/ronguerrero/HiveUDF   
--- MAGIC It's based on this UDF example from here: https://github.com/ronguerrero/HiveUDF  
--- MAGIC For the purposes of this demo, we'll use the pre-compliled JAR file: https://github.com/ronguerrero/HiveUDF/blob/main/target/hive-udf-1.0-SNAPSHOT.jar   
--- MAGIC 
--- MAGIC 
--- MAGIC Please download hive-udf-1.0-SNAPSHOT.jar to your local computer
-
--- COMMAND ----------
-
--- MAGIC %md
--- MAGIC Attach the downloaded library to your Databricks cluster.
--- MAGIC Follow along in the demo.  Or refer to the following instructions: https://docs.databricks.com/libraries/cluster-libraries.html#workspace-library
+-- MAGIC This notebook is used to add the Hive UDF to your cluster if you are having issues adding it manually.
 
 -- COMMAND ----------
 

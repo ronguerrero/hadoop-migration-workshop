@@ -1,10 +1,29 @@
 -- Databricks notebook source
--- DBTITLE 1,Hive - Table Setup
 -- MAGIC %md
--- MAGIC insert
--- MAGIC update
--- MAGIC delete
--- MAGIC merge
+-- MAGIC ### Convert Hive DML to Databricks
+-- MAGIC 
+-- MAGIC #### Technologies Used
+-- MAGIC ##### Hadoop
+-- MAGIC * Hive - to show content of data in HDFS 
+-- MAGIC ##### Databricks
+-- MAGIC * SQL
+-- MAGIC 
+-- MAGIC   
+-- MAGIC #### Objectives
+-- MAGIC * Review and existing Hive DML statement
+-- MAGIC * Demonstrate how existing Hive DML statements can be run in Databricks
+-- MAGIC * Highlight recommended changes to Hive DDL statements
+-- MAGIC * Review legacy MERGE processing approach in Hadoop
+-- MAGIC * Demonstrate legacy MERGE processing can be run in Databricks
+-- MAGIC * MERGE command in Databricks
+-- MAGIC 
+-- MAGIC 
+-- MAGIC 
+-- MAGIC #### DML Conversion Considerations
+-- MAGIC 
+-- MAGIC * Most customers will leverage ANSI SQL syntax in both Hive and Impala.   
+-- MAGIC * Databricks SQL is ANSI compliant.   
+-- MAGIC * Hive / Impala housekeeping statements like REFRESH METADATA, INVALIDATE METADATA, etc are not needed and should be removed
 
 -- COMMAND ----------
 
@@ -18,6 +37,11 @@
 -- MAGIC import os
 -- MAGIC os.environ['DBFS_RESOURCES_PATH'] = os_dbfs_resources_path
 -- MAGIC os.environ['DATABASE'] = database
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC <img src ='https://github.com/ronguerrero/hadoop-migration-workshop/raw/main/resources/Legacy%20Merge%20Logic.png'>
 
 -- COMMAND ----------
 
@@ -37,6 +61,13 @@
 -- MAGIC SELECT COUNT(1) FROM RAW_TRANSACTIONS_NEW;
 -- MAGIC SELECT * FROM RAW_TRANSACTIONS limit 10;
 -- MAGIC SELECT * FROM RAW_TRANSACTIONS_NEW limit 3"
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC There are 3 incoming rows.  
+-- MAGIC 2 rows will update existing data.  
+-- MAGIC 1 row is new and will result in an insert.
 
 -- COMMAND ----------
 
@@ -121,7 +152,3 @@ WHEN NOT MATCHED THEN
 -- COMMAND ----------
 
 SELECT COUNT(1) FROM TRANSACTIONS_DELTA;
-
--- COMMAND ----------
-
-
