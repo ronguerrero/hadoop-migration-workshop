@@ -161,3 +161,7 @@ import org.apache.spark.sql.SparkSession
 // MAGIC my_headers = {"Authorization": "Bearer " + access_token, 'Content-type': 'application/x-www-form-urlencoded'}
 // MAGIC response = requests.post(url=url + '/api/2.1/jobs/create', headers=my_headers, data=spark_jar_workflow_json)
 // MAGIC response.text
+
+// COMMAND ----------
+
+

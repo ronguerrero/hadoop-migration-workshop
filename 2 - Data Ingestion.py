@@ -42,11 +42,11 @@ from pyspark.sql.functions import input_file_name, current_timestamp
 # Define variables used in code below
 file_path = dbfs_resources_path + "/data_from_hadoop"
 username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
-table_name = f"bronze_transactions"
+table_name = f"{database}.bronze_transactions"
 checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # Clear out data from previous demo execution
-spark.sql(f"DROP TABLE IF EXISTS {username}.{table_name}")
+spark.sql(f"DROP TABLE IF EXISTS {table_name}")
 dbutils.fs.rm(checkpoint_path, True)
 
 # Configure Auto Loader to ingest JSON data to a Delta table
