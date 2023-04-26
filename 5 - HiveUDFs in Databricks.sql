@@ -17,6 +17,12 @@
 
 -- COMMAND ----------
 
+-- MAGIC %python
+-- MAGIC username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+-- MAGIC spark.conf.set("c.database", username)
+
+-- COMMAND ----------
+
 -- DBTITLE 1,The UDF returns the underlying java type for a column passed in as parameter
 -- MAGIC %md
 -- MAGIC 
