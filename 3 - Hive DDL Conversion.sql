@@ -1,8 +1,9 @@
 -- Databricks notebook source
 -- MAGIC %md
--- MAGIC 
--- MAGIC %md
 -- MAGIC ### Convert Hive DDL to Databricks
+-- MAGIC 
+-- MAGIC #### Objective
+-- MAGIC Learn about Hive DDL compatibility in Databricks and recommendations
 -- MAGIC 
 -- MAGIC #### Technologies Used
 -- MAGIC ##### Hadoop
@@ -11,7 +12,7 @@
 -- MAGIC * SQL
 -- MAGIC 
 -- MAGIC   
--- MAGIC #### Objectives
+-- MAGIC #### Steps
 -- MAGIC * Review and existing Hive DDL statement
 -- MAGIC * Demonstrate how existing Hive DDL statements can be run in Databricks
 -- MAGIC * Highlight recommended changes to Hive DDL statements

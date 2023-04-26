@@ -1,6 +1,34 @@
 // Databricks notebook source
-// MAGIC %python
-// MAGIC dbutils.widgets.removeAll()
+// MAGIC %md
+// MAGIC ### Scala Script -  Migration
+// MAGIC 
+// MAGIC #### Objective
+// MAGIC Learn how to use Databricks notebooks as alternative to spark-shell
+// MAGIC 
+// MAGIC #### Technologies Used
+// MAGIC ##### Hadoop
+// MAGIC * None - leveraging existing Scala JAR code artifact
+// MAGIC ##### Databricks
+// MAGIC * Spark
+// MAGIC 
+// MAGIC   
+// MAGIC #### Steps
+// MAGIC * Review existing Scala Spark code
+// MAGIC * Identify required modifications
+// MAGIC * Run converted code
+// MAGIC 
+// MAGIC 
+// MAGIC #### Migration Considerations
+// MAGIC * Use of Databricks notebooks helps foster live collaboration
+// MAGIC * Common code can be bundled into JAR, scala notebooks can contain high level logic.
+// MAGIC * Remove any references to Hadoop environment
+// MAGIC * Databricks uses Spark 3 - most common change is timestamp format,  but full listing is here - https://spark.apache.org/docs/latest/sql-migration-guide.html#upgrading-from-spark-sql-24-to-30  
+// MAGIC   ``` Symbols of ‘E’, ‘F’, ‘q’ and ‘Q’ can only be used for datetime formatting, e.g. date_format. They are not allowed used for datetime parsing, e.g. to_timestamp.```   
+// MAGIC   ``` Set spark.sql.legacy.timeParserPolicy to LEGACY where appropriate```
+
+// COMMAND ----------
+
+dbutils.widgets.removeAll()
 
 // COMMAND ----------
 
@@ -100,67 +128,6 @@ import org.apache.spark.sql.SparkSession
 //  }
 //}
 // scalastyle:on println
-
-// COMMAND ----------
-
-// MAGIC %python
-// MAGIC username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
-// MAGIC jar_location = f"dbfs:/tmp/{username}/resources/original-spark-examples_2.12-3.3.0.jar"
-// MAGIC modified_jar_location = f"dbfs:/tmp/{username}/resources/modified-spark-examples_2.12-3.3.0.jar"
-
-// COMMAND ----------
-
-// MAGIC %python
-// MAGIC from pyspark.dbutils import DBUtils
-// MAGIC dbutils = DBUtils(spark)
-// MAGIC 
-// MAGIC 
-// MAGIC url = "https://" + dbutils.notebook.entry_point.getDbutils().notebook().getContext().browserHostName().get() 
-// MAGIC access_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-// MAGIC clusterId = spark.conf.get("spark.databricks.clusterUsageTags.clusterId")
-
-// COMMAND ----------
-
-// MAGIC %python
-// MAGIC spark_jar_workflow_json = """
-// MAGIC {   
-// MAGIC         "name": "Spark JAR Job - Spark Pi",
-// MAGIC         "email_notifications": {
-// MAGIC             "no_alert_for_skipped_runs": false
-// MAGIC         },
-// MAGIC         "webhook_notifications": {},
-// MAGIC         "timeout_seconds": 0,
-// MAGIC         "max_concurrent_runs": 1,
-// MAGIC         "tasks": [
-// MAGIC             {
-// MAGIC                 "task_key": "Spark_Jar_SparkPI",
-// MAGIC                 "spark_jar_task": {
-// MAGIC                     "main_class_name" : "org.apache.spark.examples.SparkPi_modified",
-// MAGIC                     "parameters": [
-// MAGIC                         "10"
-// MAGIC                     ]
-// MAGIC                 },
-// MAGIC                 "existing_cluster_id":  \"""" + clusterId + """\",
-// MAGIC                 "libraries": [
-// MAGIC                 {
-// MAGIC                     "jar": \"""" + modified_jar_location + """\"
-// MAGIC                 }
-// MAGIC                 ],
-// MAGIC                 "timeout_seconds": 0,
-// MAGIC                 "email_notifications": {}
-// MAGIC             }
-// MAGIC         ],
-// MAGIC         "format": "SINGLE_TASK"
-// MAGIC     }
-// MAGIC     """
-
-// COMMAND ----------
-
-// MAGIC %python
-// MAGIC import requests
-// MAGIC my_headers = {"Authorization": "Bearer " + access_token, 'Content-type': 'application/x-www-form-urlencoded'}
-// MAGIC response = requests.post(url=url + '/api/2.1/jobs/create', headers=my_headers, data=spark_jar_workflow_json)
-// MAGIC response.text
 
 // COMMAND ----------
 

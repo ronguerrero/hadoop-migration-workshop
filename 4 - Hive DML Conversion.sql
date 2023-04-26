@@ -2,6 +2,9 @@
 -- MAGIC %md
 -- MAGIC ### Convert Hive DML to Databricks
 -- MAGIC 
+-- MAGIC #### Objectives
+-- MAGIC Learn about Hive DML compatibility with Databricks and recommendations
+-- MAGIC 
 -- MAGIC #### Technologies Used
 -- MAGIC ##### Hadoop
 -- MAGIC * Hive - to show content of data in HDFS 
@@ -9,7 +12,7 @@
 -- MAGIC * SQL
 -- MAGIC 
 -- MAGIC   
--- MAGIC #### Objectives
+-- MAGIC #### Steps
 -- MAGIC * Review and existing Hive DML statement
 -- MAGIC * Demonstrate how existing Hive DML statements can be run in Databricks
 -- MAGIC * Highlight recommended changes to Hive DDL statements

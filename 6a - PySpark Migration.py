@@ -1,6 +1,9 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC ### Pyspark
+# MAGIC ### Pyspark Script Migration
+# MAGIC 
+# MAGIC #### Objective
+# MAGIC Learn what changes are required for PySpark script migration
 # MAGIC 
 # MAGIC #### Technologies Used
 # MAGIC ##### Hadoop
@@ -13,6 +16,12 @@
 # MAGIC * Review existing PySpark code
 # MAGIC * Identify required modifications
 # MAGIC * Run converted code
+# MAGIC 
+# MAGIC 
+# MAGIC #### Migration Considerations
+# MAGIC * Use of Databricks notebooks helps foster live collaboration
+# MAGIC * Common code can be bundled into wheel/egg files, main notebook can be the entry point
+# MAGIC * You can use local IDE for development - https://docs.databricks.com/dev-tools/databricks-connect.html
 
 # COMMAND ----------
 

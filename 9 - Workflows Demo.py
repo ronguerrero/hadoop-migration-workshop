@@ -1,14 +1,48 @@
 # Databricks notebook source
-from pyspark.dbutils import DBUtils
-dbutils = DBUtils(spark)
-
-
-url = "https://" + dbutils.notebook.entry_point.getDbutils().notebook().getContext().browserHostName().get() 
-access_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-clusterId = spark.conf.get("spark.databricks.clusterUsageTags.clusterId")
+# MAGIC %md
+# MAGIC ### Databricks Worfklows
+# MAGIC 
+# MAGIC #### Objective
+# MAGIC Learn how to create a Databricks workflow.
+# MAGIC 
+# MAGIC #### Technologies Used
+# MAGIC ##### Hadoop
+# MAGIC * None - leveraging existing Scala JAR code artifact
+# MAGIC ##### Databricks
+# MAGIC * Spark
+# MAGIC 
+# MAGIC   
+# MAGIC #### Steps
+# MAGIC * Auto-generate workflow comprised of Hive Specific labs
+# MAGIC * Walkthrough the workflow definition
+# MAGIC * Execute the workflow, and monitor it's progress
+# MAGIC 
+# MAGIC 
+# MAGIC #### Migration Considerations
+# MAGIC * Workflows supports
+# MAGIC   * forking and merging in DAGs  
+# MAGIC   * re-use cluster across workflow tasks  
+# MAGIC   * passing parameters across tasks
+# MAGIC   * can be triggered on the availability of files on cloud storage
+# MAGIC   * can specify a timeout setting - job fails if completion time exceeds limit
 
 # COMMAND ----------
 
+# MAGIC %python
+# MAGIC from pyspark.dbutils import DBUtils
+# MAGIC dbutils = DBUtils(spark)
+# MAGIC 
+# MAGIC username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+# MAGIC jar_location = f"dbfs:/tmp/{username}/resources/original-spark-examples_2.12-3.3.0.jar"
+# MAGIC modified_jar_location = f"dbfs:/tmp/{username}/resources/modified-spark-examples_2.12-3.3.0.jar"
+# MAGIC 
+# MAGIC url = "https://" + dbutils.notebook.entry_point.getDbutils().notebook().getContext().browserHostName().get() 
+# MAGIC access_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+# MAGIC clusterId = spark.conf.get("spark.databricks.clusterUsageTags.clusterId")
+
+# COMMAND ----------
+
+# DBTITLE 1,We'll be calling the Databricks REST APIs, assemble the JSON input 
 workflow_json="""
 {
     "name": "Run all Hive Migration",
@@ -105,12 +139,10 @@ workflow_json="""
 
 # COMMAND ----------
 
+# DBTITLE 1,Issue the REST call
 import requests
 my_headers = {"Authorization": "Bearer " + access_token, 'Content-type': 'application/x-www-form-urlencoded'}
 response = requests.post(url=url + '/api/2.1/jobs/create', headers=my_headers, data=workflow_json)
-
-# COMMAND ----------
-
 response.text
 
 # COMMAND ----------

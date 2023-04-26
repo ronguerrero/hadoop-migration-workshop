@@ -1,6 +1,11 @@
 -- Databricks notebook source
 -- MAGIC %md
--- MAGIC This notebook is used to add the Hive UDF to your cluster if you are having issues adding it manually.
+-- MAGIC ### Automatically add lab Hive UDF to currently attached cluster
+-- MAGIC 
+-- MAGIC This is not a lab exercise.  It is a helper notebook to assist with adding the UDF jar file to the compute environment.
+-- MAGIC 
+-- MAGIC #### Steps
+-- MAGIC * Issue REST call to add Hive UDF jar file to cluster
 
 -- COMMAND ----------
 
@@ -45,7 +50,3 @@
 -- MAGIC my_headers = {"Authorization": "Bearer " + access_token, 'Content-type': 'application/x-www-form-urlencoded'}
 -- MAGIC response = requests.post(url=url + '/api/2.0/libraries/install', headers=my_headers, data=libraries_json)
 -- MAGIC response.text
-
--- COMMAND ----------
-
-

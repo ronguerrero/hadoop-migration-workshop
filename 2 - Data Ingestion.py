@@ -2,6 +2,10 @@
 # MAGIC %md
 # MAGIC ### Ingestion data into the Delta Lakehouse
 # MAGIC 
+# MAGIC #### Objective
+# MAGIC Learn a mechanism to load data into the Delta Lakehouse.  
+# MAGIC Also look into Delta Live Tables - https://www.databricks.com/product/delta-live-tables  
+# MAGIC 
 # MAGIC #### Technologies Used
 # MAGIC ##### Hadoop
 # MAGIC * DistCP - to copy data from local HDFS to cloud storage
@@ -11,7 +15,7 @@
 # MAGIC * SQL - Delta
 # MAGIC 
 # MAGIC   
-# MAGIC #### Objectives
+# MAGIC #### Steps
 # MAGIC * Migrate data from HDFS to cloud storage
 # MAGIC * Use Auto Loader to load data into the Delta Lake
 # MAGIC * Use Auto Loader to handle incremental loads into the Delta Lake

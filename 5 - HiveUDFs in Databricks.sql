@@ -2,6 +2,9 @@
 -- MAGIC %md
 -- MAGIC ### Using Hive UDFs in Databricks
 -- MAGIC 
+-- MAGIC #### Objectives
+-- MAGIC Learn about Hive UDF compatibility in Databricks
+-- MAGIC 
 -- MAGIC #### Technologies Used
 -- MAGIC ##### Hadoop
 -- MAGIC * Hive - to show original execution of UDF 
@@ -19,10 +22,10 @@
 -- MAGIC https://docs.databricks.com/udf/index.html#which-udfs-are-most-efficient  
 -- MAGIC Some UDFs are more efficient than others. In terms of performance:
 -- MAGIC 
--- MAGIC *Built in functions will be fastest because of Databricks optimizers.  
--- MAGIC *Code that executes in the JVM (Scala, Java, Hive UDFs) will be faster than Python UDFs.  
--- MAGIC *Pandas UDFs use Arrow to reduce serialization costs associated with Python UDFs.  
--- MAGIC *Python UDFs should generally be avoided, but Python can be used as glue code without any degradation in performance.  
+-- MAGIC * Built in functions will be fastest because of Databricks optimizers.  
+-- MAGIC * Code that executes in the JVM (Scala, Java, Hive UDFs) will be faster than Python UDFs.  
+-- MAGIC * Pandas UDFs use Arrow to reduce serialization costs associated with Python UDFs.  
+-- MAGIC * Python UDFs should generally be avoided, but Python can be used as glue code without any degradation in performance.  
 -- MAGIC 
 -- MAGIC 
 -- MAGIC #### Setup
