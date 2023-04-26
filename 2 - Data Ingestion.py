@@ -1,8 +1,22 @@
 # Databricks notebook source
+username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+dbfs_resources_path = f"/tmp/{username}/resources/"
+os_dbfs_resources_path = f"/dbfs/" + dbfs_resources_path
+spark.conf.set("c.database", username)
+database=username
+
+import os
+os.environ['DBFS_RESOURCES_PATH'] = os_dbfs_resources_path
+os.environ['DATABASE'] = database
+
+
+# COMMAND ----------
+
 # DBTITLE 1,Make a cloud directory for the Hadoop Data
 # MAGIC %sh
-# MAGIC rm -rf /dbfs/data_from_hadoop;
-# MAGIC mkdir /dbfs/data_from_hadoop
+# MAGIC # just to be sure, remove any existing data
+# MAGIC rm -rf $DBFS_RESOURCES_PATH/data_from_hadoop;
+# MAGIC mkdir $DBFS_RESOURCES_PATH/data_from_hadoop
 
 # COMMAND ----------
 
@@ -11,13 +25,13 @@
 # MAGIC export HADOOP_HOME=/usr/local/hadoop/
 # MAGIC export HIVE_HOME=/usr/local/hive/
 # MAGIC export PATH=$HADOOP_HOME/bin:$HIVE_HOME/bin:$PATH
-# MAGIC hadoop distcp /tmp/raw_transactions file:/dbfs/data_from_hadoop
+# MAGIC hadoop distcp /tmp/raw_transactions file:$DBFS_RESOURCES_PATH/data_from_hadoop
 
 # COMMAND ----------
 
 # DBTITLE 1,Verify the data has been copied to cloud storage
-# MAGIC %fs
-# MAGIC ls /data_from_hadoop/raw_transactions/
+# MAGIC %sh
+# MAGIC ls $DBFS_RESOURCES_PATH/data_from_hadoop/raw_transactions/
 
 # COMMAND ----------
 
@@ -26,13 +40,13 @@
 from pyspark.sql.functions import input_file_name, current_timestamp
 
 # Define variables used in code below
-file_path = "/data_from_hadoop"
+file_path = dbfs_resources_path + "/data_from_hadoop"
 username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
 table_name = f"bronze_transactions"
 checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # Clear out data from previous demo execution
-spark.sql(f"DROP TABLE IF EXISTS {table_name}")
+spark.sql(f"DROP TABLE IF EXISTS {username}.{table_name}")
 dbutils.fs.rm(checkpoint_path, True)
 
 # Configure Auto Loader to ingest JSON data to a Delta table
@@ -51,13 +65,27 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # DBTITLE 1,Check the row count 
 # MAGIC %sql
-# MAGIC select count(*) from bronze_transactions;
+# MAGIC USE ${c.database} ;
+# MAGIC SELECT count(*) FROM bronze_transactions;
 
 # COMMAND ----------
 
 # DBTITLE 1,Spot check the data
 # MAGIC %sql
-# MAGIC select * from bronze_transactions limit 10;
+# MAGIC SELECT * FROM bronze_transactions limit 10;
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC export HADOOP_HOME=/usr/local/hadoop/
+# MAGIC export HIVE_HOME=/usr/local/hive/
+# MAGIC export PATH=$HADOOP_HOME/bin:$HIVE_HOME/bin:$PATH
+# MAGIC 
+# MAGIC # NOTE we are copying data to the same location as before!
+# MAGIC hdfs dfs -ls /tmp/raw_transactions2 
+# MAGIC echo
+# MAGIC # There are 3 json records we want appended
+# MAGIC hdfs dfs -cat /tmp/raw_transactions2/part-00000-tid-4080381317870435782-30f504d1-326c-4189-8871-aecfe8e7e9e7-2241-1-c000.json
 
 # COMMAND ----------
 
@@ -68,7 +96,7 @@ dbutils.fs.rm(checkpoint_path, True)
 # MAGIC export PATH=$HADOOP_HOME/bin:$HIVE_HOME/bin:$PATH
 # MAGIC 
 # MAGIC # NOTE we are copying data to the same location as before!
-# MAGIC hadoop distcp /tmp/raw_transactions2 file:/dbfs/data_from_hadoop
+# MAGIC hadoop distcp /tmp/raw_transactions2 file:$DBFS_RESOURCES_PATH/data_from_hadoop
 
 # COMMAND ----------
 
@@ -89,7 +117,7 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # DBTITLE 1,Check row count - should see a minor increase in row count
 # MAGIC %sql
-# MAGIC select count(*) from bronze_transactions;
+# MAGIC SELECT count(*) FROM bronze_transactions;
 
 # COMMAND ----------
 
@@ -104,8 +132,8 @@ dbutils.fs.rm(checkpoint_path, True)
 # COMMAND ----------
 
 # DBTITLE 1,List current files for BRONZE_TRANSACTION table
-# MAGIC %fs
-# MAGIC ls /user/hive/warehouse/bronze_transactions
+# MAGIC %sh
+# MAGIC ls -l /dbfs/user/hive/warehouse/${DATABASE}.db/bronze_transactions/
 
 # COMMAND ----------
 
@@ -116,21 +144,21 @@ dbutils.fs.rm(checkpoint_path, True)
 # COMMAND ----------
 
 # DBTITLE 1,File listing after OPTIMZE
-# MAGIC %fs
-# MAGIC ls /user/hive/warehouse/bronze_transactions
+# MAGIC %sh
+# MAGIC ls -l /dbfs/user/hive/warehouse/${DATABASE}.db/bronze_transactions/
 
 # COMMAND ----------
 
 # DBTITLE 1,VACUUM to remove older data files
 # MAGIC %sql
-# MAGIC set spark.databricks.delta.retentionDurationCheck.enabled = false;
-# MAGIC vacuum bronze_transactions retain 0 hours
+# MAGIC SET spark.databricks.delta.retentionDurationCheck.enabled = false;
+# MAGIC VACUUM bronze_transactions retain 0 hours
 
 # COMMAND ----------
 
 # DBTITLE 1,File listing after VACUUM
-# MAGIC %fs
-# MAGIC ls /user/hive/warehouse/bronze_transactions
+# MAGIC %sh
+# MAGIC ls -l /dbfs/user/hive/warehouse/${DATABASE}.db/bronze_transactions/
 
 # COMMAND ----------
 

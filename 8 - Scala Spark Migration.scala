@@ -1,4 +1,9 @@
 // Databricks notebook source
+// MAGIC %python
+// MAGIC dbutils.widgets.removeAll()
+
+// COMMAND ----------
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -46,7 +51,7 @@ object SparkPi {
 // COMMAND ----------
 
 dbutils.widgets.removeAll
-dbutils.widgets.text("slices", "2", "Slices")
+dbutils.widgets.text("slices", "10", "Slices")
 
 // COMMAND ----------
 
@@ -98,4 +103,61 @@ import org.apache.spark.sql.SparkSession
 
 // COMMAND ----------
 
+// MAGIC %python
+// MAGIC username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+// MAGIC jar_location = f"dbfs:/tmp/{username}/resources/original-spark-examples_2.12-3.3.0.jar"
+// MAGIC modified_jar_location = f"dbfs:/tmp/{username}/resources/modified-spark-examples_2.12-3.3.0.jar"
 
+// COMMAND ----------
+
+// MAGIC %python
+// MAGIC from pyspark.dbutils import DBUtils
+// MAGIC dbutils = DBUtils(spark)
+// MAGIC 
+// MAGIC 
+// MAGIC url = "https://" + dbutils.notebook.entry_point.getDbutils().notebook().getContext().browserHostName().get() 
+// MAGIC access_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+// MAGIC clusterId = spark.conf.get("spark.databricks.clusterUsageTags.clusterId")
+
+// COMMAND ----------
+
+// MAGIC %python
+// MAGIC spark_jar_workflow_json = """
+// MAGIC {   
+// MAGIC         "name": "Spark JAR Job - Spark Pi",
+// MAGIC         "email_notifications": {
+// MAGIC             "no_alert_for_skipped_runs": false
+// MAGIC         },
+// MAGIC         "webhook_notifications": {},
+// MAGIC         "timeout_seconds": 0,
+// MAGIC         "max_concurrent_runs": 1,
+// MAGIC         "tasks": [
+// MAGIC             {
+// MAGIC                 "task_key": "Spark_Jar_SparkPI",
+// MAGIC                 "spark_jar_task": {
+// MAGIC                     "main_class_name" : "org.apache.spark.examples.SparkPi_modified",
+// MAGIC                     "parameters": [
+// MAGIC                         "10"
+// MAGIC                     ]
+// MAGIC                 },
+// MAGIC                 "existing_cluster_id":  \"""" + clusterId + """\",
+// MAGIC                 "libraries": [
+// MAGIC                 {
+// MAGIC                     "jar": \"""" + modified_jar_location + """\"
+// MAGIC                 }
+// MAGIC                 ],
+// MAGIC                 "timeout_seconds": 0,
+// MAGIC                 "email_notifications": {}
+// MAGIC             }
+// MAGIC         ],
+// MAGIC         "format": "SINGLE_TASK"
+// MAGIC     }
+// MAGIC     """
+
+// COMMAND ----------
+
+// MAGIC %python
+// MAGIC import requests
+// MAGIC my_headers = {"Authorization": "Bearer " + access_token, 'Content-type': 'application/x-www-form-urlencoded'}
+// MAGIC response = requests.post(url=url + '/api/2.1/jobs/create', headers=my_headers, data=spark_jar_workflow_json)
+// MAGIC response.text

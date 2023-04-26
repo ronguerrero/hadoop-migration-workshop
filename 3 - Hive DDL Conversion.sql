@@ -13,6 +13,19 @@
 
 -- COMMAND ----------
 
+-- MAGIC %python
+-- MAGIC username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+-- MAGIC dbfs_resources_path = f"/tmp/{username}/resources/"
+-- MAGIC os_dbfs_resources_path = f"/dbfs/" + dbfs_resources_path
+-- MAGIC spark.conf.set("c.database", username)
+-- MAGIC database=username
+-- MAGIC 
+-- MAGIC import os
+-- MAGIC os.environ['DBFS_RESOURCES_PATH'] = os_dbfs_resources_path
+-- MAGIC os.environ['DATABASE'] = database
+
+-- COMMAND ----------
+
 -- DBTITLE 1,Generate the Hive DDL for the Loan Transaction Table
 -- MAGIC %sh
 -- MAGIC export HADOOP_HOME=/usr/local/hadoop/
@@ -26,6 +39,7 @@
 
 -- DBTITLE 1,Copy-Pasted DDL from above, with minor changes
 -- let's drop the table just in case it exists
+USE ${c.database};
 DROP TABLE IF EXISTS TRANSACTIONS_PARQUET_HADOOP;
 
 -- DDL is the same, but we'll remove the LOCATION clause to keep things simple
@@ -119,7 +133,7 @@ SELECT * FROM TRANSACTIONS_PARQUET;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Load the data from the Parquet table into the Delta table we defined earlier/
+-- DBTITLE 1,Load the data from the Parquet table into the Delta table we defined earlier
 -- MAGIC %sql
 -- MAGIC INSERT INTO TRANSACTIONS_DELTA (SELECT * FROM TRANSACTIONS_PARQUET);
 
@@ -138,8 +152,30 @@ SELECT * FROM TRANSACTIONS_CONVERTED;
 
 -- COMMAND ----------
 
+-- DBTITLE 1,Confirm the table is in Parquet format - scroll down to "Provider" value
+DESCRIBE EXTENDED TRANSACTIONS_CONVERTED;
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Show the underlying contents on cloud storage
+-- MAGIC %sh
+-- MAGIC ls /dbfs/user/hive/warehouse/${DATABASE}.db/transactions_converted/
+
+-- COMMAND ----------
+
 -- DBTITLE 1,Simply run the CONVERT TO DELTA command to convert a parquet table to the delta format.
 CONVERT TO DELTA TRANSACTIONS_CONVERTED;
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Confirm the table is now in Delta format - scroll down to "Provider" value
+DESCRIBE EXTENDED TRANSACTIONS_CONVERTED;
+
+-- COMMAND ----------
+
+-- DBTITLE 1,Note how there is a delta_log directory within the table data
+-- MAGIC %sh
+-- MAGIC ls /dbfs/user/hive/warehouse/${DATABASE}.db/transactions_converted/
 
 -- COMMAND ----------
 

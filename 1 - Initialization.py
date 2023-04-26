@@ -188,6 +188,7 @@
 
 # COMMAND ----------
 
+# DBTITLE 1,Download the data for the workshop
 username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
 dbfs_raw_path = f"/tmp/{username}/raw_transactions/"
 dbfs_raw_new_path = f"/tmp/{username}/raw_transactions_new/"
@@ -203,11 +204,22 @@ dbutils.fs.cp("file:/usr/local/hive/raw_transactions2/", dbfs_raw_new_path, True
 
 spark.conf.set("c.dbfs_raw_path", dbfs_raw_path)
 spark.conf.set("c.dbfs_raw_new_path", dbfs_raw_new_path)
+spark.conf.set("c.database", username)
 
+dbfs_resources_path = f"/tmp/{username}/resources/"
+os_dbfs_resources_path = f"/dbfs/tmp/{username}/resources/"
+dbutils.fs.mkdirs(dbfs_resources_path)
+
+import os
+os.environ['DBFS_RESOURCES_PATH'] = os_dbfs_resources_path
+print(os.getenv('DBFS_RESOURCES_PATH'))
 
 # COMMAND ----------
 
+# DBTITLE 1,Create the Delta Tables for the workshop
 # MAGIC %sql
+# MAGIC CREATE DATABASE if not exists ${c.database};
+# MAGIC USE ${c.database};
 # MAGIC DROP TABLE IF EXISTS RAW_TRANSACTIONS;
 # MAGIC CREATE TABLE RAW_TRANSACTIONS (
 # MAGIC acc_fv_change_before_taxes float,
@@ -244,16 +256,13 @@ spark.conf.set("c.dbfs_raw_new_path", dbfs_raw_new_path)
 
 # COMMAND ----------
 
+# DBTITLE 1,Validate the the new transaction data
 # MAGIC %sql
 # MAGIC select count(*) from RAW_TRANSACTIONS_NEW;
 
 # COMMAND ----------
 
-dbfs_resources_path = f"/tmp/{username}/resources/"
-dbutils.fs.mkdirs(dbfs_resources_path)
-
-# COMMAND ----------
-
+# DBTITLE 1,Download test data for Spark examples
 # MAGIC %sh
 # MAGIC cd /tmp
 # MAGIC rm people.*
@@ -267,15 +276,19 @@ dbutils.fs.cp("file:/tmp/people.txt", dbfs_resources_path)
 
 # COMMAND ----------
 
+# DBTITLE 1,Spark JAR examples
 # MAGIC %sh
 # MAGIC cd /tmp
 # MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/original-spark-examples_2.12-3.3.0.jar
 # MAGIC wget https://github.com/ronguerrero/hadoop-utilities/raw/main/resources/modified-spark-examples_2.12-3.3.0.jar
+# MAGIC wget https://github.com/ronguerrero/HiveUDF/raw/main/target/hive-udf-1.0-SNAPSHOT.jar
 
 # COMMAND ----------
 
 dbutils.fs.cp("file:/tmp/original-spark-examples_2.12-3.3.0.jar", dbfs_resources_path)
 dbutils.fs.cp("file:/tmp/modified-spark-examples_2.12-3.3.0.jar", dbfs_resources_path)
+dbutils.fs.cp("file:/tmp/hive-udf-1.0-SNAPSHOT.jar", dbfs_resources_path)
+
 
 
 
