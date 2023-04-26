@@ -74,7 +74,12 @@ object SparkPi {
     spark.stop()
   }
 }
+org.apache.spark.examples.SparkPi.main(Array("10"))
 // scalastyle:on println
+
+// COMMAND ----------
+
+
 
 // COMMAND ----------
 

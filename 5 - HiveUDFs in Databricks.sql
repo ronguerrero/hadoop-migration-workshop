@@ -89,6 +89,16 @@
 
 -- COMMAND ----------
 
+-- MAGIC %python
+-- MAGIC import os
+-- MAGIC from pyspark.dbutils import DBUtils
+-- MAGIC dbutils = DBUtils(spark)
+-- MAGIC 
+-- MAGIC username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
+-- MAGIC spark.conf.set("c.database", username)
+
+-- COMMAND ----------
+
 -- MAGIC %sh
 -- MAGIC export HADOOP_HOME=/usr/local/hadoop/
 -- MAGIC export HIVE_HOME=/usr/local/hive/
@@ -120,3 +130,7 @@ SELECT udftypeof(id) FROM raw_transactions limit 1
 
 -- DBTITLE 1,Full transparency - Spark SQL already has this built-in function :)
 SELECT TYPEOF(id) FROM raw_transactions limit 1
+
+-- COMMAND ----------
+
+

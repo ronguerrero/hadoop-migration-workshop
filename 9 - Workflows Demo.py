@@ -97,6 +97,9 @@ workflow_json="""
                 "task_key": "DML_Conversion",
                 "depends_on": [
                     {
+                        "task_key": "Ingestion"
+                    },
+                    {
                         "task_key": "DDL_Conversion"
                     }
                 ],
@@ -107,25 +110,7 @@ workflow_json="""
                 "existing_cluster_id":  \"""" + clusterId + """\",
                 "timeout_seconds": 0,
                 "email_notifications": {}
-            },
-            {
-                "task_key": "UDF_Conversion",
-                "depends_on": [
-                    {
-                        "task_key": "DML_Conversion"
-                    },
-                    {
-                        "task_key": "DDL_Conversion"
-                    }
-                ],
-                "notebook_task": {
-                    "notebook_path": "5 - HiveUDFs in Databricks",
-                    "source": "GIT"
-                },
-                "existing_cluster_id":  \"""" + clusterId + """\",
-                "timeout_seconds": 0,
-                "email_notifications": {}
-            } 
+            }
         ],
         "git_source": {
             "git_url": "https://github.com/ronguerrero/hadoop-utilities/",
