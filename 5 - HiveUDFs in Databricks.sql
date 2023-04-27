@@ -89,6 +89,7 @@
 
 -- COMMAND ----------
 
+-- DBTITLE 1,Lab environment variables
 -- MAGIC %python
 -- MAGIC import os
 -- MAGIC from pyspark.dbutils import DBUtils
@@ -99,6 +100,7 @@
 
 -- COMMAND ----------
 
+-- DBTITLE 1,HIVE - execute the Hive UDF
 -- MAGIC %sh
 -- MAGIC export HADOOP_HOME=/usr/local/hadoop/
 -- MAGIC export HIVE_HOME=/usr/local/hive/
@@ -117,18 +119,19 @@
 
 -- COMMAND ----------
 
+-- DBTITLE 1,DATABRICKS - register the hive UDF
 USE ${c.database};
 DROP TEMPORARY FUNCTION IF EXISTS udftypeof;
 CREATE TEMPORARY FUNCTION udftypeof AS 'com.mycompany.hiveudf.TypeOf'
 
 -- COMMAND ----------
 
--- DBTITLE 1,Let's display the java type
+-- DBTITLE 1,DATABRICKS - Let's display the java type
 SELECT udftypeof(id) FROM raw_transactions limit 1
 
 -- COMMAND ----------
 
--- DBTITLE 1,Full transparency - Spark SQL already has this built-in function :)
+-- DBTITLE 1,DATABRICKS - Spark SQL already has this built-in function :)
 SELECT TYPEOF(id) FROM raw_transactions limit 1
 
 -- COMMAND ----------

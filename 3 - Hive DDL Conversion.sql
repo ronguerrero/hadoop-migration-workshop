@@ -11,6 +11,11 @@
 -- MAGIC ##### Databricks
 -- MAGIC * SQL
 -- MAGIC 
+-- MAGIC #### Datasets Used
+-- MAGIC ##### Loan Transaction Table
+-- MAGIC * HIVE - TRANSACTIONS_PARQUET                 - table that resides in Hadoop, corresponding DDL used in Databricks
+-- MAGIC * DATABRICKS - TRANSACTIONS_PARQUET_HADOOP    - table in Databricks created using Hive syntax
+-- MAGIC * DATABRICKS - TRANSACTIONS_DELTA             - table in Databricks created using Delta
 -- MAGIC   
 -- MAGIC #### Steps
 -- MAGIC * Review and existing Hive DDL statement
@@ -46,7 +51,7 @@
 
 -- COMMAND ----------
 
--- DBTITLE 1,Generate the Hive DDL for the Loan Transaction Table
+-- DBTITLE 1,HIVE - Generate the Hive DDL for the Loan Transaction Table
 -- MAGIC %sh
 -- MAGIC export HADOOP_HOME=/usr/local/hadoop/
 -- MAGIC export HIVE_HOME=/usr/local/hive/
@@ -57,7 +62,7 @@
 
 -- COMMAND ----------
 
--- DBTITLE 1,Copy-Pasted DDL from above, with minor changes
+-- DBTITLE 1,DATABRICKS - Copy-Pasted DDL from above, with minor changes
 -- let's drop the table just in case it exists
 USE ${c.database};
 DROP TABLE IF EXISTS TRANSACTIONS_PARQUET_HADOOP;
@@ -110,7 +115,7 @@ TBLPROPERTIES (
 
 -- COMMAND ----------
 
--- DBTITLE 1,DDL converted to Spark SQL syntax - Recommended
+-- DBTITLE 1,DATABRICKS - DDL converted to Spark SQL syntax - Recommended
 DROP TABLE IF EXISTS TRANSACTIONS_DELTA;
 CREATE TABLE `TRANSACTIONS_DELTA`(
   `acc_fv_change_before_taxes` float, 
@@ -150,12 +155,12 @@ TBLPROPERTIES (
 
 -- COMMAND ----------
 
--- DBTITLE 1,In Databricks, show data from existing parquet table
+-- DBTITLE 1,DATABRICKS - In Databricks, show data from existing parquet table
 SELECT * FROM TRANSACTIONS_PARQUET;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Load the data from the Parquet table into the Delta table we defined earlier
+-- DBTITLE 1,DATABRICKS - Load the data from the Parquet table into the Delta table we defined earlier
 -- MAGIC %sql
 -- MAGIC INSERT INTO TRANSACTIONS_DELTA (SELECT * FROM TRANSACTIONS_PARQUET);
 
@@ -166,7 +171,7 @@ SELECT * FROM TRANSACTIONS_PARQUET;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Let's start by creating a Parquet table we can convert
+-- DBTITLE 1,DATABRICKS - Let's start by creating a Parquet table we can convert
 DROP TABLE IF EXISTS TRANSACTIONS_CONVERTED;
 CREATE TABLE TRANSACTIONS_CONVERTED LIKE TRANSACTIONS_PARQUET USING PARQUET;
 INSERT INTO TRANSACTIONS_CONVERTED SELECT * FROM TRANSACTIONS_PARQUET;
@@ -174,27 +179,27 @@ SELECT * FROM TRANSACTIONS_CONVERTED;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Confirm the table is in Parquet format - scroll down to "Provider" value
+-- DBTITLE 1,DATABRICKS - Confirm the table is in Parquet format - scroll down to "Provider" value
 DESCRIBE EXTENDED TRANSACTIONS_CONVERTED;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Show the underlying contents on cloud storage
+-- DBTITLE 1,DATABRICKS - Show the underlying contents on cloud storage
 -- MAGIC %sh
 -- MAGIC ls /dbfs/user/hive/warehouse/${DATABASE}.db/transactions_converted/
 
 -- COMMAND ----------
 
--- DBTITLE 1,Simply run the CONVERT TO DELTA command to convert a parquet table to the delta format.
+-- DBTITLE 1,DATABRICKS - Simply run the CONVERT TO DELTA command to convert a parquet table to the delta format.
 CONVERT TO DELTA TRANSACTIONS_CONVERTED;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Confirm the table is now in Delta format - scroll down to "Provider" value
+-- DBTITLE 1,DATABRICKS - Confirm the table is now in Delta format - scroll down to "Provider" value
 DESCRIBE EXTENDED TRANSACTIONS_CONVERTED;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Note how there is a delta_log directory within the table data
+-- DBTITLE 1,DATABRICKS - Note how there is a delta_log directory within the table data
 -- MAGIC %sh
 -- MAGIC ls /dbfs/user/hive/warehouse/${DATABASE}.db/transactions_converted/

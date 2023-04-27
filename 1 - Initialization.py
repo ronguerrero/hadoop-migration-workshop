@@ -4,7 +4,7 @@
 # MAGIC 
 # MAGIC #### Objective
 # MAGIC Spin up a local hadoop environment for future exercises.
-# MAGIC Download and initialize lab data.
+# MAGIC Download and initialize lab data.    
 # MAGIC 
 # MAGIC #### Technologies Used
 # MAGIC ##### Hadoop
@@ -13,6 +13,7 @@
 # MAGIC * Hive
 # MAGIC ##### Databricks
 # MAGIC * SQL - Delta
+# MAGIC 
 # MAGIC 
 # MAGIC   
 # MAGIC #### Steps

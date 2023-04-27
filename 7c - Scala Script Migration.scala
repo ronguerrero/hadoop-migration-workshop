@@ -6,8 +6,7 @@
 // MAGIC Learn how to use Databricks notebooks as alternative to spark-shell
 // MAGIC 
 // MAGIC #### Technologies Used
-// MAGIC ##### Hadoop
-// MAGIC * None - leveraging existing Scala JAR code artifact
+// MAGIC 
 // MAGIC ##### Databricks
 // MAGIC * Spark
 // MAGIC 
@@ -79,11 +78,7 @@ org.apache.spark.examples.SparkPi.main(Array("10"))
 
 // COMMAND ----------
 
-
-
-// COMMAND ----------
-
-dbutils.widgets.removeAll
+dbutils.widgets.removeAll()
 dbutils.widgets.text("slices", "10", "Slices")
 
 // COMMAND ----------

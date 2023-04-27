@@ -14,6 +14,21 @@
 # MAGIC * Auto Loader - Spark 
 # MAGIC * SQL - Delta
 # MAGIC 
+# MAGIC #### Datasets Used
+# MAGIC ##### Loan Transaction Table
+# MAGIC * HIVE - RAW TRANSACTIONS - raw json data            - full snapshot of loan transactions 
+# MAGIC * HIVE - RAW TRANSACTIONS NEW - raw json data        - incremental loan transactions
+# MAGIC * DATABRICKS - RAW TRANSACTIONS - raw json data      - data the is DistCP from hadoop into "raw" zone in cloud storage
+# MAGIC * DATABRICKS - RAW TRANSACTIONS NEW - raw json data  - incremental data loaded from hadoop into "raw" zone in cloud
+# MAGIC * DATABRICKS - BRONZE_TRANSACTIONS - delta           - data converted into Delta format via Auto Loader
+# MAGIC   
+# MAGIC 
+# MAGIC ##### Databricks
+# MAGIC * Auto Loader - Spark 
+# MAGIC * SQL - Delta
+# MAGIC NOTE - Delta Live Tables can be used to auto load data into Delta - https://www.databricks.com/product/delta-live-tables
+# MAGIC    * Auto detects availability of new files in cloud storage
+# MAGIC 
 # MAGIC   
 # MAGIC #### Steps
 # MAGIC * Migrate data from HDFS to cloud storage
@@ -48,7 +63,7 @@ checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # COMMAND ----------
 
-# DBTITLE 1,Make a cloud directory for the Hadoop Data
+# DBTITLE 1,DATABRICKS - Make a cloud directory for the Hadoop Data
 # MAGIC %sh
 # MAGIC # just to be sure, remove any existing data
 # MAGIC rm -rf $DBFS_RESOURCES_PATH/data_from_hadoop;
@@ -61,7 +76,7 @@ checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # COMMAND ----------
 
-# DBTITLE 1,Use DistCP to copy the data from HDFS to the newly create cloud location
+# DBTITLE 1,HADOOP- Use DistCP to copy the data from HDFS to the newly create cloud location
 # MAGIC %sh
 # MAGIC export HADOOP_HOME=/usr/local/hadoop/
 # MAGIC export HIVE_HOME=/usr/local/hive/
@@ -70,7 +85,7 @@ checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # COMMAND ----------
 
-# DBTITLE 1,Verify the data has been copied to cloud storage
+# DBTITLE 1,DATABRICKS - Verify the data has been copied to cloud storage
 # MAGIC %sh
 # MAGIC ls $DBFS_RESOURCES_PATH/data_from_hadoop/raw_transactions/
 
@@ -88,7 +103,7 @@ checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # COMMAND ----------
 
-# DBTITLE 1,Let's use autoloader  to load data into Delta
+# DBTITLE 1,DATABRICKS - Let's use autoloader  to load data into Delta
 
 # Clear out data from previous demo execution
 spark.sql(f"DROP TABLE IF EXISTS {table_name}")
@@ -108,20 +123,20 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,Check the row count 
+# DBTITLE 1,DATABRICKS - Check the row count 
 # MAGIC %sql
 # MAGIC USE ${c.database} ;
 # MAGIC SELECT count(*) FROM bronze_transactions;
 
 # COMMAND ----------
 
-# DBTITLE 1,Spot check the data
+# DBTITLE 1,DATABRICKS - Spot check the data
 # MAGIC %sql
 # MAGIC SELECT * FROM bronze_transactions limit 10;
 
 # COMMAND ----------
 
-# DBTITLE 1,Review the incremental data from HDFS 
+# DBTITLE 1,HADOOP - Review the incremental data from HDFS 
 # MAGIC %sh
 # MAGIC export HADOOP_HOME=/usr/local/hadoop/
 # MAGIC export HIVE_HOME=/usr/local/hive/
@@ -140,7 +155,7 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,Copy incremental data from HDFS to cloud storage
+# DBTITLE 1,HADOOP - Copy incremental data from HDFS to cloud storage
 # MAGIC %sh
 # MAGIC export HADOOP_HOME=/usr/local/hadoop/
 # MAGIC export HIVE_HOME=/usr/local/hive/
@@ -151,7 +166,7 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,Incrementally load data into the bronze table - assumption is just an append, but this can be changed to a merge
+# DBTITLE 1,DATABRICKS - Incrementally load data into the bronze table - assumption is just an append, but this can be changed to a merge
 # load the incremental data
 (spark.readStream
   .format("cloudFiles")
@@ -166,13 +181,13 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,Check row count - should see a minor increase in row count
+# DBTITLE 1,DATABRICKS - Check row count - should see a minor increase in row count
 # MAGIC %sql
 # MAGIC SELECT count(*) FROM bronze_transactions;
 
 # COMMAND ----------
 
-# DBTITLE 1,Data in Databricks can be access via SQL queries
+# DBTITLE 1,DATABRICKS - Data in Databricks can be access via SQL queries
 # MAGIC %sql
 # MAGIC SELECT sum(balance), country_code FROM bronze_transactions GROUP BY country_code
 
@@ -183,19 +198,19 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,List current files for BRONZE_TRANSACTION table
+# DBTITLE 1,DATABRICKS - List current files for BRONZE_TRANSACTION table
 # MAGIC %sh
 # MAGIC ls -l /dbfs/user/hive/warehouse/${DATABASE}.db/bronze_transactions/
 
 # COMMAND ----------
 
-# DBTITLE 1,Run the OPTIMIZE command to compact files
+# DBTITLE 1,DATABRICKS - Run the OPTIMIZE command to compact files
 # MAGIC %sql
 # MAGIC OPTIMIZE bronze_transactions
 
 # COMMAND ----------
 
-# DBTITLE 1,File listing after OPTIMZE
+# DBTITLE 1,DATABRICKS - File listing after OPTIMZE
 # MAGIC %sh
 # MAGIC ls -l /dbfs/user/hive/warehouse/${DATABASE}.db/bronze_transactions/
 
@@ -207,14 +222,14 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# DBTITLE 1,VACUUM to remove older data files
+# DBTITLE 1,DATABRICKS - VACUUM to remove older data files
 # MAGIC %sql
 # MAGIC SET spark.databricks.delta.retentionDurationCheck.enabled = false;
 # MAGIC VACUUM bronze_transactions retain 0 hours
 
 # COMMAND ----------
 
-# DBTITLE 1,File listing after VACUUM
+# DBTITLE 1,DATABRICKS - File listing after VACUUM
 # MAGIC %sh
 # MAGIC ls -l /dbfs/user/hive/warehouse/${DATABASE}.db/bronze_transactions/
 

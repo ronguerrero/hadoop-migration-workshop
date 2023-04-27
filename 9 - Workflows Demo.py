@@ -6,14 +6,13 @@
 # MAGIC Learn how to create a Databricks workflow.
 # MAGIC 
 # MAGIC #### Technologies Used
-# MAGIC ##### Hadoop
-# MAGIC * None - leveraging existing Scala JAR code artifact
+# MAGIC 
 # MAGIC ##### Databricks
 # MAGIC * Spark
 # MAGIC 
 # MAGIC   
 # MAGIC #### Steps
-# MAGIC * Auto-generate workflow comprised of Hive Specific labs
+# MAGIC * Auto-generate workflow comprised of Hive Specific labs - "Run all Hive Migration"
 # MAGIC * Walkthrough the workflow definition
 # MAGIC * Execute the workflow, and monitor it's progress
 # MAGIC 

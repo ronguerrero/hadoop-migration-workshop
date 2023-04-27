@@ -48,7 +48,7 @@
 
 -- COMMAND ----------
 
--- DBTITLE 1,Let's look at the original data in Hive
+-- DBTITLE 1,HIVE - Let's look at the original data in Hive
 -- MAGIC %sh
 -- MAGIC export HADOOP_HOME=/usr/local/hadoop/
 -- MAGIC export HIVE_HOME=/usr/local/hive/
@@ -74,7 +74,7 @@
 
 -- COMMAND ----------
 
--- DBTITLE 1,Hive Parquet - Handle Merge of New Data
+-- DBTITLE 1,HIVE - Handle Merge of New Data in parquet
 -- MAGIC %sh
 -- MAGIC export HADOOP_HOME=/usr/local/hadoop/
 -- MAGIC export HIVE_HOME=/usr/local/hive/
@@ -95,7 +95,7 @@
 
 -- COMMAND ----------
 
--- DBTITLE 1,Hive - Validate existing data
+-- DBTITLE 1,HIVE - Validate existing data
 -- MAGIC %sh
 -- MAGIC export HADOOP_HOME=/usr/local/hadoop/
 -- MAGIC export HIVE_HOME=/usr/local/hive/
@@ -106,7 +106,7 @@
 
 -- COMMAND ----------
 
--- DBTITLE 1,Databricks - Identical SQL statements as Hive.    Works, but we can do better.
+-- DBTITLE 1,DATABRICKS - Identical SQL statements as Hive.    Works, but we can do better.
 USE ${c.database};
 DROP TABLE IF EXISTS TRANSACTIONS_PARQUET_OLD;
 DROP TABLE IF EXISTS TRANSACTIONS_PARQUET_NEW;
@@ -136,11 +136,12 @@ ALTER TABLE
 
 -- COMMAND ----------
 
+-- DBTITLE 1,DATABRICKS - check table record count
 SELECT count(*) FROM TRANSACTIONS_PARQUET;
 
 -- COMMAND ----------
 
--- DBTITLE 1,Databricks - Use MERGE logic to simplify code with Delta Tables!
+-- DBTITLE 1,DATABRICKS - Use MERGE logic to simplify code with Delta Tables!
 MERGE INTO 
    TRANSACTIONS_DELTA 
 USING 
@@ -154,4 +155,5 @@ WHEN NOT MATCHED THEN
 
 -- COMMAND ----------
 
+-- DBTITLE 1,DATABRICKS - validate record count
 SELECT COUNT(1) FROM TRANSACTIONS_DELTA;

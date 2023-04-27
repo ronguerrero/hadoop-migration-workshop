@@ -6,8 +6,7 @@
 # MAGIC Learn what changes are required for PySpark script migration
 # MAGIC 
 # MAGIC #### Technologies Used
-# MAGIC ##### Hadoop
-# MAGIC * None - leveraging existing PySpark code which may by a .py file
+# MAGIC 
 # MAGIC ##### Databricks
 # MAGIC * Spark
 # MAGIC 

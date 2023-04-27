@@ -6,8 +6,7 @@
 # MAGIC Learn what changes are required for PySpark script migration
 # MAGIC 
 # MAGIC #### Technologies Used
-# MAGIC ##### Hadoop
-# MAGIC * None - leveraging existing PySpark code which may by a .py file
+# MAGIC 
 # MAGIC ##### Databricks
 # MAGIC * Spark
 # MAGIC 
@@ -255,6 +254,7 @@ if __name__ == "__main__":
 
 # COMMAND ----------
 
+# DBTITLE 1,Lab Environment Variables
 username = spark.sql("SELECT regexp_replace(current_user(), '[^a-zA-Z0-9]', '_')").first()[0]
 resource_folder = f"/tmp/{username}/resources/"
 

@@ -5,8 +5,7 @@
 // MAGIC #### Objective
 // MAGIC Learn how to submit compiled JAR files into Databricks using recommended Submit JAR approach
 // MAGIC #### Technologies Used
-// MAGIC ##### Hadoop
-// MAGIC * None - leveraging existing Scala JAR code artifact
+// MAGIC 
 // MAGIC ##### Databricks
 // MAGIC * Spark
 // MAGIC 
@@ -14,8 +13,8 @@
 // MAGIC #### Steps
 // MAGIC * Review existing Scala Spark code
 // MAGIC * Identify required modifications
-// MAGIC * Auto-generate a Databricks workflow job that submits a pre-compiled
-// MAGIC * Run the generated Databricks workflow - "Spark Submit - Spark Pi"
+// MAGIC * Auto-generate a Databricks workflow job that submits a pre-compiled JAR
+// MAGIC * Run the generated Databricks workflow - "Submit JAR Job - Spark Pi"
 // MAGIC 
 // MAGIC 
 // MAGIC #### Migration Considerations
@@ -89,7 +88,7 @@
 // MAGIC %python
 // MAGIC spark_jar_workflow_json = """
 // MAGIC {   
-// MAGIC         "name": "Spark JAR Job - Spark Pi",
+// MAGIC         "name": "Submit JAR Job - Spark Pi",
 // MAGIC         "email_notifications": {
 // MAGIC             "no_alert_for_skipped_runs": false
 // MAGIC         },

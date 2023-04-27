@@ -3,11 +3,13 @@
 # MAGIC ### Scala Code (JAR) -  Migration
 # MAGIC 
 # MAGIC #### Objective
-# MAGIC Learn how to submit compiled JAR files into Databricks using spark-submit semantics
+# MAGIC Learn how to submit compiled JAR files into Databricks using spark-submit semantics.   
+# MAGIC NOTE - YOU WILL NOT BE ABLE TO RUN THE WORKFLOW IN THE WEBINAR LAB ENVIRONMENT!   
+# MAGIC The generated workflow requires permissions to create clusters.  Do not request this permission in the lab environment.
+# MAGIC 
 # MAGIC 
 # MAGIC #### Technologies Used
-# MAGIC ##### Hadoop
-# MAGIC * None - leveraging existing Scala JAR code artifact
+# MAGIC 
 # MAGIC ##### Databricks
 # MAGIC * Spark
 # MAGIC 
@@ -15,25 +17,26 @@
 # MAGIC #### Steps
 # MAGIC * Review existing Scala Spark code
 # MAGIC * Identify required modifications
-# MAGIC * Auto-generate a Databricks workflow job that submits a pre-compiled 
-# MAGIC * Run the generated Databricks workflow - "Spark Submit - Spark Pi"
+# MAGIC * Auto-generate a Databricks workflow job that submits a pre-compiled jar - "Spark Submit - Spark Pi"
+# MAGIC * NOTE - you will not be able to run this in the webinar environment!
 # MAGIC 
 # MAGIC 
 # MAGIC #### Migration Considerations
 # MAGIC * You can use local IDE for development - https://docs.databricks.com/dev-tools/databricks-connect.html
-# MAGIC * External IDEs can be used to build Spark JAR files
-# MAGIC * Remove any references to Hadoop environment
-# MAGIC * Databricks uses Spark 3 - most common change is timestamp format,  but full listing is here - https://spark.apache.org/docs/latest/sql-migration-guide.html#upgrading-from-spark-sql-24-to-30  
-# MAGIC   ``` Symbols of ‘E’, ‘F’, ‘q’ and ‘Q’ can only be used for datetime formatting, e.g. date_format. They are not allowed used for datetime parsing, e.g. to_timestamp.```   
-# MAGIC   ``` Set spark.sql.legacy.timeParserPolicy to LEGACY where appropriate```
-# MAGIC * Job submission will be modified - spark-submit semantics are supported, but there are limitations - https://docs.databricks.com/dev-tools/api/2.0/jobs.html#sparksubmittask   
+# MAGIC * External IDEs can be used to build Spark JAR files.  JARs can be built within CI/CD processes.
+# MAGIC * Typical code changes:
+# MAGIC   * Remove any references to Hadoop environment
+# MAGIC   * Databricks uses Spark 3 - most common change is timestamp format,  but full listing is here - https://spark.apache.org/docs/latest/sql-migration-guide.html#upgrading-from-spark-sql-24-to-30  
+# MAGIC     ``` Symbols of ‘E’, ‘F’, ‘q’ and ‘Q’ can only be used for datetime formatting, e.g. date_format. They are not allowed used for datetime parsing, e.g. to_timestamp.```   
+# MAGIC     ``` Set spark.sql.legacy.timeParserPolicy to LEGACY where appropriate```
+# MAGIC   * Job submission will be modified - spark-submit semantics are supported, but there are limitations - https://docs.databricks.com/dev-tools/api/2.0/jobs.html#sparksubmittask   
 # MAGIC   ```
-# MAGIC    * You can invoke Spark submit tasks only on new clusters.
-# MAGIC    * In the new_cluster specification, libraries and spark_conf are not supported. Instead, use --jars and --py-files to add Java and Python libraries and --conf to set the Spark configuration.
-# MAGIC    * master, deploy-mode, and executor-cores are automatically configured by Databricks; you cannot specify them in parameters.
-# MAGIC    * By default, the Spark submit job uses all available memory (excluding reserved memory for Databricks services). You can set --driver-memory, and --executor-memory to a smaller value to leave some room for off-heap usage.
+# MAGIC      * You can invoke Spark submit tasks only on new clusters.
+# MAGIC     * In the new_cluster specification, libraries and spark_conf are not supported. Instead, use --jars and --py-files to add Java and Python libraries and --conf to set the Spark configuration.
+# MAGIC     * master, deploy-mode, and executor-cores are automatically configured by Databricks; you cannot specify them in parameters.
+# MAGIC     * By default, the Spark submit job uses all available memory (excluding reserved memory for Databricks services). You can set --driver-memory, and --executor-memory to a smaller value to leave some room for off-heap usage.
 # MAGIC    ```
-# MAGIC * Recommendation - use Submit JAR instead
+# MAGIC   * Recommendation - use Submit JAR instead
 
 # COMMAND ----------
 
