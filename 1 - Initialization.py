@@ -1,4 +1,31 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC ### Workshop Setup
+# MAGIC 
+# MAGIC #### Objective
+# MAGIC Spin up a local hadoop environment for future exercises.
+# MAGIC Download and initialize lab data.
+# MAGIC 
+# MAGIC #### Technologies Used
+# MAGIC ##### Hadoop
+# MAGIC * HDFS
+# MAGIC * YARN
+# MAGIC * Hive
+# MAGIC ##### Databricks
+# MAGIC * SQL - Delta
+# MAGIC 
+# MAGIC   
+# MAGIC #### Steps
+# MAGIC * Deploy Hadoop in Pseudo-Distributed mode
+# MAGIC * Set up Hive environment - data and UDF
+# MAGIC * Download data to cloud storage (DBFS)
+# MAGIC * Create initial Delta tables
+# MAGIC 
+# MAGIC 
+# MAGIC <img src ='https://github.com/ronguerrero/hadoop-migration-workshop/raw/main/resources/Lab%20Environment.png'>
+
+# COMMAND ----------
+
 # DBTITLE 1,Install a pseudo-distributed Hadoop Environment with Hive
 # MAGIC %sh
 # MAGIC cd /root/
@@ -258,7 +285,7 @@ print(os.getenv('DBFS_RESOURCES_PATH'))
 
 # DBTITLE 1,Validate the the new transaction data
 # MAGIC %sql
-# MAGIC select count(*) from RAW_TRANSACTIONS_NEW;
+# MAGIC SELECT count(*) FROM RAW_TRANSACTIONS_NEW;
 
 # COMMAND ----------
 

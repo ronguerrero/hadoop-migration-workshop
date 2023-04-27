@@ -83,6 +83,11 @@ checkpoint_path = f"/tmp/{username}/_checkpoint/etl_quickstart"
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC We'll use autoloader in this lab.  You can also leverage Delta Live Tables. https://www.databricks.com/product/delta-live-tables
+
+# COMMAND ----------
+
 # DBTITLE 1,Let's use autoloader  to load data into Delta
 
 # Clear out data from previous demo execution
