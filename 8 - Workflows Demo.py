@@ -21,8 +21,8 @@
 # MAGIC * Workflows supports
 # MAGIC   * forking and merging in DAGs  
 # MAGIC   * re-use cluster across workflow tasks  
-# MAGIC   * passing parameters across tasks
-# MAGIC   * can be triggered on the availability of files on cloud storage
+# MAGIC   * passing parameters across tasks - https://docs.databricks.com/workflows/jobs/share-task-context.html
+# MAGIC   * can be triggered on the availability of files on cloud storage - https://docs.databricks.com/workflows/jobs/file-arrival-triggers.html
 # MAGIC   * can specify a timeout setting - job fails if completion time exceeds limit
 
 # COMMAND ----------

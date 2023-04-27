@@ -5,7 +5,8 @@
 # MAGIC #### Objective
 # MAGIC Learn how to submit compiled JAR files into Databricks using spark-submit semantics.   
 # MAGIC NOTE - YOU WILL NOT BE ABLE TO RUN THE WORKFLOW IN THE WEBINAR LAB ENVIRONMENT!   
-# MAGIC The generated workflow requires permissions to create clusters.  Do not request this permission in the lab environment.
+# MAGIC The generated workflow requires permissions to create clusters.  Do not request this permission in the lab environment.   
+# MAGIC The Spark Submit can be scripted using REST API calls i.e. called by 3rd Party schedulers or tools
 # MAGIC 
 # MAGIC 
 # MAGIC #### Technologies Used
